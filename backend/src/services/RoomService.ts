@@ -1,5 +1,5 @@
 import prisma from '../database/connection';
-import { CreateRoomRequest, UpdateRoomRequest, RoomData, RoomResult } from '../types/room';
+import { CreateRoomRequest, RoomData, RoomResult } from '../types/room';
 
 export class RoomService {
   static async getRooms(): Promise<RoomData[]> {
@@ -25,7 +25,7 @@ export class RoomService {
     return { success: true, message: 'Room created successfully', data: room };
   }
 
-  static async updateRoom(id: number, data: UpdateRoomRequest, requesterId: number): Promise<RoomResult> {
+  static async updateRoom(id: number, data: CreateRoomRequest, requesterId: number): Promise<RoomResult> {
     const room = await prisma.room.findUnique({ where: { id } });
 
     if (!room) return { success: false, message: 'Room not found' };
