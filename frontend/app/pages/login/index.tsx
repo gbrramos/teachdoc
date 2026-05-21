@@ -18,7 +18,7 @@ export default function Login() {
         event.preventDefault();
 
         const isAuth = await authenticate(name, password);
-        
+        console.log(isAuth);
         if (isAuth) {
             setAuth(true);
         }
