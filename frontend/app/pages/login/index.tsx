@@ -1,0 +1,47 @@
+import { useState } from "react";
+import { Form } from "react-router";
+import Button from "~/components/Button";
+import Input from "~/components/Input";
+import { authenticate } from "~/services/login-service";
+
+export default function Login() {
+
+    const [name, setName] = useState("");
+    const [password, setPassword] = useState("");
+    const [auth, setAuth] = useState(false);
+
+    const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => setName(event.target.value);
+
+    const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => setPassword(event.target.value);
+
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+
+        const isAuth = await authenticate(name, password);
+        
+        if (isAuth) {
+            setAuth(true);
+        }
+    }
+
+    return (
+        <div className="flex flex-col items-center justify-center min-h-screen">
+            <div className="bg-white p-8 rounded shadow-md justify-start">
+                <h1 className="text-2xl font-bold text-black mb-4">TeachDoc</h1>
+                <Form onSubmit={handleSubmit}>
+                    <div className="mb-4">
+                        <Input type="text" onChange={handleNameChange} placeholder="Enter your username" />
+                    </div> 
+                    <div className="mb-4">
+                        <Input type="password" onChange={handlePasswordChange} placeholder="Enter your password" />
+                    </div> 
+                    <div className="flex justify-between">
+                        <Button type="submit">Login</Button>
+                        <Button type="button" variant="secondary">Registrar</Button>
+                    </div>
+                    {auth && <p className="text-green-500 mt-4">Login successful!</p>}
+                </Form>
+            </div>
+        </div>
+    );
+}
