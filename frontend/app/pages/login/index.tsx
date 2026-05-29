@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Form } from "react-router";
+import { Form, useNavigate } from "react-router";
 import Button from "~/components/Button";
 import Input from "~/components/Input";
 import { authenticate } from "~/services/login-service";
@@ -8,7 +8,8 @@ export default function Login() {
 
     const [name, setName] = useState("");
     const [password, setPassword] = useState("");
-    const [auth, setAuth] = useState(false);
+    const [error, setError] = useState("");
+    const navigate = useNavigate();
 
     const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => setName(event.target.value);
 
@@ -16,11 +17,14 @@ export default function Login() {
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+        setError("");
 
-        const isAuth = await authenticate(name, password);
-        
-        if (isAuth) {
-            setAuth(true);
+        try {
+            const token = await authenticate(name, password);
+            sessionStorage.setItem('token', token);
+            navigate('/home');
+        } catch {
+            setError("Invalid credentials. Please try again.");
         }
     }
 
@@ -39,7 +43,7 @@ export default function Login() {
                         <Button type="submit">Login</Button>
                         <Button type="button" variant="secondary">Registrar</Button>
                     </div>
-                    {auth && <p className="text-green-500 mt-4">Login successful!</p>}
+                    {error && <p className="text-red-500 mt-4">{error}</p>}
                 </Form>
             </div>
         </div>

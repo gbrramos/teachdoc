@@ -13,7 +13,7 @@ class ApiService {
   }
 
   private getAuthHeader(): Record<string, string> {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     return token ? { Authorization: `Bearer ${token}` } : {};
   }
 

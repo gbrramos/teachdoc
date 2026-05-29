@@ -47,7 +47,7 @@ export class AuthService {
 
   static async seedDefaultUser(): Promise<{ success: boolean; message: string }> {
     const DEFAULT_EMAIL = process.env.DEFAULT_USER_EMAIL || 'admin@teachdoc.com';
-    const DEFAULT_PASSWORD = process.env.DEFAULT_USER_PASSWORD || 'Admin@1234';
+    const DEFAULT_PASSWORD = process.env.DEFAULT_USER_PASSWORD || 'admin';
 
     const existing = await prisma.user.findUnique({ where: { email: DEFAULT_EMAIL } });
     if (existing) {

@@ -1,5 +1,10 @@
 import api from "./api";
 
-export async function authenticate (name: string, password: string): Promise<any> {
-    return await api.post('/login', { email: name, password: password });
+interface LoginResponse {
+    token: string;
+}
+
+export async function authenticate(name: string, password: string): Promise<string> {
+    const response = await api.post<LoginResponse>('/login', { email: name, password: password });
+    return response.token;
 }
