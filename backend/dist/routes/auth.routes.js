@@ -7,6 +7,7 @@ const authRoutes = (0, express_1.Router)();
 authRoutes.get('/version', AuthController_1.getVersion);
 authRoutes.post('/login', AuthController_1.login);
 authRoutes.get('/seed-default-user', AuthController_1.seedDefaultUser);
+authRoutes.get('/get-authenticated', auth_middleware_1.authenticate, AuthController_1.getAuthenticated);
 authRoutes.get('/users', auth_middleware_1.authenticate, AuthController_1.listUsers);
-authRoutes.post('/users', auth_middleware_1.authenticate, AuthController_1.createUser);
+authRoutes.post('/users', AuthController_1.createUser);
 exports.default = authRoutes;

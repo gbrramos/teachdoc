@@ -1,12 +1,24 @@
 import { Request, Response } from 'express';
 import { RoomService } from '../services/RoomService';
+import { AuthService } from '../services/AuthService';
 
-export async function listRooms(req: Request, res: Response) {
+export async function listRooms(req: Request & { user?: any }, res: Response) {
   try {
-    const rooms = await RoomService.getRooms();
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : undefined;
+    const payload = token ? AuthService.verifyToken(token) : req.user;
+    const userId = Number(payload?.id);
+
+    if (!Number.isInteger(userId) || userId <= 0) {
+      res.status(401).json({ success: false, message: 'Invalid user session' });
+      return;
+    }
+
+    const rooms = await RoomService.getRooms(userId);
     res.status(200).json({ success: true, data: rooms });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Internal server error' });
+    console.log(error);
+    res.status(500).json({ success: false, message: error });
   }
 }
 
@@ -62,6 +74,35 @@ export async function deleteRoom(req: Request & { user?: any }, res: Response) {
 
     if (!result.success) {
       const status = result.message === 'Room not found' ? 404 : 403;
+      res.status(status).json(result);
+      return;
+    }
+
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+}
+
+export async function associateRoom(req: Request & { user?: any }, res: Response) {
+  try {
+    const userId = Number(req.params.userId);
+    const roomId = Number(req.params.roomId);
+
+    if (!Number.isInteger(userId) || userId <= 0) {
+      res.status(401).json({ success: false, message: 'Invalid user session' });
+      return;
+    }
+
+    if (!Number.isInteger(roomId) || roomId <= 0) {
+      res.status(400).json({ success: false, message: 'Room id is required' });
+      return;
+    }
+
+    const result = await RoomService.associateRoom(roomId, userId);
+
+    if (!result.success) {
+      const status = result.message === 'Room not found' ? 404 : 409;
       res.status(status).json(result);
       return;
     }

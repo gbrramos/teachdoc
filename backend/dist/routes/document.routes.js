@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const DocumentController_1 = require("../controllers/DocumentController");
+const auth_middleware_1 = require("../middlewares/auth.middleware");
+const documentRoutes = (0, express_1.Router)();
+documentRoutes.get('/documents/:id', auth_middleware_1.authenticate, DocumentController_1.getDocument);
+documentRoutes.get('/rooms/:roomId/documents', auth_middleware_1.authenticate, DocumentController_1.listDocumentsByRoom);
+documentRoutes.get('/students/:studentId/documents', auth_middleware_1.authenticate, DocumentController_1.listDocumentsByStudent);
+documentRoutes.post('/documents', auth_middleware_1.authenticate, DocumentController_1.createDocument);
+documentRoutes.put('/documents/:id', auth_middleware_1.authenticate, DocumentController_1.updateDocument);
+documentRoutes.delete('/documents/:id', auth_middleware_1.authenticate, DocumentController_1.deleteDocument);
+exports.default = documentRoutes;

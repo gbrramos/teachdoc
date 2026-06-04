@@ -20,6 +20,15 @@ export class AuthService {
     }
   }
 
+  static async getAuthenticatedUser(id: number): Promise<User | null> {
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: { id: true, name: true, email: true, role: true },
+    });
+    if (!user) return null;
+    return { ...user, id: String(user.id), role: user.role as UserRoles };
+  }
+
   static async getUsers(): Promise<User[]> {
     const users = await prisma.user.findMany(
         {select: { id: true, email: true, role: true }}

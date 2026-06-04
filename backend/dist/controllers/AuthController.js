@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createUser = createUser;
 exports.listUsers = listUsers;
+exports.getAuthenticated = getAuthenticated;
 exports.seedDefaultUser = seedDefaultUser;
 exports.getVersion = getVersion;
 exports.login = login;
@@ -21,6 +22,24 @@ async function listUsers(req, res) {
     try {
         const users = await AuthService_1.AuthService.getUsers();
         res.status(200).json({ success: true, data: users });
+    }
+    catch (error) {
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+}
+async function getAuthenticated(req, res) {
+    try {
+        const userId = Number(req.user?.id);
+        if (!Number.isInteger(userId) || userId <= 0) {
+            res.status(401).json({ success: false, message: 'Invalid user session' });
+            return;
+        }
+        const user = await AuthService_1.AuthService.getAuthenticatedUser(userId);
+        if (!user) {
+            res.status(404).json({ success: false, message: 'User not found' });
+            return;
+        }
+        res.status(200).json({ success: true, data: user });
     }
     catch (error) {
         res.status(500).json({ success: false, message: 'Internal server error' });

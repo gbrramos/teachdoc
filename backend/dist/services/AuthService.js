@@ -22,6 +22,15 @@ class AuthService {
             return null;
         }
     }
+    static async getAuthenticatedUser(id) {
+        const user = await connection_1.default.user.findUnique({
+            where: { id },
+            select: { id: true, name: true, email: true, role: true },
+        });
+        if (!user)
+            return null;
+        return { ...user, id: String(user.id), role: user.role };
+    }
     static async getUsers() {
         const users = await connection_1.default.user.findMany({ select: { id: true, email: true, role: true } });
         return users.map((u) => ({ ...u, id: String(u.id), role: u.role }));
@@ -43,7 +52,7 @@ class AuthService {
     }
     static async seedDefaultUser() {
         const DEFAULT_EMAIL = process.env.DEFAULT_USER_EMAIL || 'admin@teachdoc.com';
-        const DEFAULT_PASSWORD = process.env.DEFAULT_USER_PASSWORD || 'Admin@1234';
+        const DEFAULT_PASSWORD = process.env.DEFAULT_USER_PASSWORD || 'admin';
         const existing = await connection_1.default.user.findUnique({ where: { email: DEFAULT_EMAIL } });
         if (existing) {
             return { success: false, message: 'Default user already exists' };

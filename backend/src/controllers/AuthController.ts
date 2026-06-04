@@ -1,5 +1,6 @@
 import { AuthService } from '../services/AuthService';
 import { LoginRequest, CreateUserRequest } from '../types/index';
+import { Request, Response } from 'express';
 
 export async function createUser(req: any, res: any) {
     try {
@@ -16,6 +17,28 @@ export async function listUsers(req: any, res: any) {
     try {
         const users = await AuthService.getUsers();
         res.status(200).json({ success: true, data: users });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+}
+
+export async function getAuthenticated(req: Request & { user?: any }, res: Response) {
+    try {
+        const userId = Number(req.user?.id);
+
+        if (!Number.isInteger(userId) || userId <= 0) {
+            res.status(401).json({ success: false, message: 'Invalid user session' });
+            return;
+        }
+
+        const user = await AuthService.getAuthenticatedUser(userId);
+
+        if (!user) {
+            res.status(404).json({ success: false, message: 'User not found' });
+            return;
+        }
+
+        res.status(200).json({ success: true, data: user });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Internal server error' });
     }

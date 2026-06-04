@@ -6,8 +6,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.RoomService = void 0;
 const connection_1 = __importDefault(require("../database/connection"));
 class RoomService {
-    static async getRooms() {
+    static async getRooms(userId) {
         return connection_1.default.room.findMany({
+            where: {
+                OR: [
+                    { ownerId: userId },
+                    { students: { some: { userId } } },
+                ],
+            },
             include: { owner: { select: { id: true, name: true, email: true } } },
             orderBy: { createdAt: 'desc' },
         });
@@ -46,6 +52,21 @@ class RoomService {
             return { success: false, message: 'Forbidden' };
         await connection_1.default.room.delete({ where: { id } });
         return { success: true, message: 'Room deleted successfully' };
+    }
+    static async associateRoom(id, name, userId) {
+        const room = await connection_1.default.room.findFirst({ where: { id, name } });
+        if (!room)
+            return { success: false, message: 'Room not found' };
+        const existingAssociation = await connection_1.default.roomStudent.findUnique({
+            where: { userId_roomId: { userId, roomId: id } },
+        });
+        if (existingAssociation) {
+            return { success: false, message: 'User is already associated with this room' };
+        }
+        await connection_1.default.roomStudent.create({
+            data: { userId, roomId: id },
+        });
+        return { success: true, message: 'User associated with room successfully' };
     }
 }
 exports.RoomService = RoomService;

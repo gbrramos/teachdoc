@@ -12,7 +12,6 @@ export default function Login() {
     const navigate = useNavigate();
 
     const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => setName(event.target.value);
-
     const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => setPassword(event.target.value);
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -28,6 +27,10 @@ export default function Login() {
         }
     }
 
+    const handleNavigateToRegister = () => {
+        navigate('/register');
+    }
+
     return (
         <div className="flex flex-col items-center justify-center min-h-screen">
             <div className="bg-white p-8 rounded shadow-md justify-start">
@@ -41,7 +44,7 @@ export default function Login() {
                     </div> 
                     <div className="flex justify-between">
                         <Button type="submit">Login</Button>
-                        <Button type="button" variant="secondary">Registrar</Button>
+                        <Button type="button" variant="secondary" onClick={handleNavigateToRegister}>Registrar</Button>
                     </div>
                     {error && <p className="text-red-500 mt-4">{error}</p>}
                 </Form>

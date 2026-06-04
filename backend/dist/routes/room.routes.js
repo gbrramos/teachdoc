@@ -8,5 +8,6 @@ roomRoutes.get('/rooms', auth_middleware_1.authenticate, RoomController_1.listRo
 roomRoutes.get('/rooms/:id', auth_middleware_1.authenticate, RoomController_1.getRoom);
 roomRoutes.post('/rooms', auth_middleware_1.authenticate, RoomController_1.createRoom);
 roomRoutes.put('/rooms/:id', auth_middleware_1.authenticate, RoomController_1.updateRoom);
+roomRoutes.patch('/associate/room/:roomId/user/:userId', auth_middleware_1.authenticate, RoomController_1.associateRoom);
 roomRoutes.delete('/rooms/:id', auth_middleware_1.authenticate, RoomController_1.deleteRoom);
 exports.default = roomRoutes;
