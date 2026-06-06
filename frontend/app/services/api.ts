@@ -75,6 +75,16 @@ class ApiService {
   }
 }
 
-const api = new ApiService(import.meta.env.VITE_API_URL ?? 'http://localhost:8000');
+const apiUrl = import.meta.env.VITE_API_URL;
+
+if (!apiUrl && typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+  console.error(
+    '[TeachDoc] VITE_API_URL is not set. ' +
+    'The app will try to reach http://localhost:8000 which will fail in production. ' +
+    'Set the VITE_API_URL environment variable in your Vercel project settings and redeploy.'
+  );
+}
+
+const api = new ApiService(apiUrl ?? 'http://localhost:8000');
 
 export default api;
