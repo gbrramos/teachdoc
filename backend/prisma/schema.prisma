@@ -54,6 +54,8 @@ model Document {
   studentId Int
   roomId    Int
   content   String   @db.LongText
+  status    String   @default("PENDING")
+  teacherNotes String? @db.LongText
   student   User     @relation(fields: [studentId], references: [id])
   room      Room     @relation(fields: [roomId], references: [id])
   createdAt DateTime @default(now())

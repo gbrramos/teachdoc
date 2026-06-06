@@ -53,8 +53,8 @@ class RoomService {
         await connection_1.default.room.delete({ where: { id } });
         return { success: true, message: 'Room deleted successfully' };
     }
-    static async associateRoom(id, name, userId) {
-        const room = await connection_1.default.room.findFirst({ where: { id, name } });
+    static async associateRoom(id, userId) {
+        const room = await connection_1.default.room.findFirst({ where: { id } });
         if (!room)
             return { success: false, message: 'Room not found' };
         const existingAssociation = await connection_1.default.roomStudent.findUnique({

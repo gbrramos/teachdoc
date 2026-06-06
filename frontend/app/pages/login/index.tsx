@@ -20,7 +20,9 @@ export default function Login() {
 
         try {
             const token = await authenticate(name, password);
-            sessionStorage.setItem('token', token);
+            if (typeof window !== 'undefined') {
+              sessionStorage.setItem('token', token);
+            }
             navigate('/home');
         } catch {
             setError("Invalid credentials. Please try again.");

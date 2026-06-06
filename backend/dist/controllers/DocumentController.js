@@ -46,7 +46,12 @@ async function createDocument(req, res) {
         const studentId = Number(req.user.id);
         const result = await DocumentService_1.DocumentService.createDocument(req.body, studentId);
         if (!result.success) {
-            res.status(404).json(result);
+            const status = result.message === 'Room not found'
+                ? 404
+                : result.message === 'Document content is required'
+                    ? 400
+                    : 403;
+            res.status(status).json(result);
             return;
         }
         res.status(201).json(result);
@@ -61,7 +66,13 @@ async function updateDocument(req, res) {
         const requesterId = Number(req.user.id);
         const result = await DocumentService_1.DocumentService.updateDocument(id, req.body, requesterId);
         if (!result.success) {
-            const status = result.message === 'Document not found' ? 404 : 403;
+            const status = result.message === 'Document not found'
+                ? 404
+                : result.message === 'Approved documents cannot be changed'
+                    ? 409
+                    : result.message === 'Invalid document status' || result.message === 'No review fields provided' || result.message === 'No update fields provided' || result.message === 'Document content is required'
+                        ? 400
+                        : 403;
             res.status(status).json(result);
             return;
         }

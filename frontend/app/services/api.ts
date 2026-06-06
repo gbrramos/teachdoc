@@ -13,7 +13,7 @@ class ApiService {
   }
 
   private getAuthHeader(): Record<string, string> {
-    const token = sessionStorage.getItem('token');
+    const token = typeof window !== 'undefined' ? sessionStorage.getItem('token') : null;
     return token ? { Authorization: `Bearer ${token}` } : {};
   }
 

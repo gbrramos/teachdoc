@@ -20,6 +20,11 @@ export async function getRooms(): Promise<Room[]> {
     return response.data;
 }
 
+export async function getRoom(id: number): Promise<Room> {
+    const response = await api.get<{ success: boolean; data: Room }>(`/rooms/${id}`);
+    return response.data;
+}
+
 export async function createRoom(name: string): Promise<Room> {
     const result = await api.post<{ success: boolean; message: string; data: Room }>('/rooms', { name });
     return result.data;
@@ -28,3 +33,8 @@ export async function createRoom(name: string): Promise<Room> {
 export async function deleteRoom(id: number): Promise<void> {
     await api.delete(`/rooms/${id}`);
 }
+
+export async function associateRoom(roomId: number, userId: number): Promise<void> {
+    await api.patch(`/associate/room/${roomId}/user/${userId}`);
+}
+

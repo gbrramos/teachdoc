@@ -4,7 +4,7 @@ import { getAuthenticatedUser, type AuthUser } from "~/services/login-service";
 export type { AuthUser };
 
 export function useAuth(): { user: AuthUser | null; token: string | null; isAuthenticated: boolean; loading: boolean } {
-    const token = sessionStorage.getItem('token');
+    const token = typeof window !== 'undefined' ? sessionStorage.getItem('token') : null;
     const [user, setUser] = useState<AuthUser | null>(null);
     const [loading, setLoading] = useState<boolean>(!!token);
 

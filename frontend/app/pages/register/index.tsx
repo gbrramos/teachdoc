@@ -18,7 +18,7 @@ export default function Login() {
 
         try {
             await register(name, email, password);
-            navigate('/login');
+            navigate('/');
         } catch {
             setError("Failed to create account. Please try again.");
         }
@@ -43,7 +43,7 @@ export default function Login() {
                     </div>
                     <div className="flex justify-between">
                         <Button type="submit">Create</Button>
-                        <Button type={"button"} variant="secondary" onClick={() => navigate('/login')}>Back to Login</Button>
+                        <Button type={"button"} variant="secondary" onClick={() => navigate('/')}>Back to Login</Button>
                     </div>
                     {error && <p className="text-red-500 mt-4">{error}</p>}
                 </Form>

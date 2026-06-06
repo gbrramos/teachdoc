@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
+import AppHeader from "~/components/AppHeader";
 import Button from "~/components/Button";
 import Input from "~/components/Input";
-import { getRooms, createRoom, deleteRoom, type Room } from "~/services/room-service";
+import { getRooms, createRoom, deleteRoom, associateRoom, type Room } from "~/services/room-service";
+import {useAuth} from "~/hooks/useAuth";
 
 export function meta() {
   return [{ title: "TeachDoc - Home" }];
@@ -15,10 +17,11 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [creating, setCreating] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
-    if (!sessionStorage.getItem("token")) {
-      navigate("/login");
+    if (typeof window === 'undefined' || !sessionStorage.getItem("token")) {
+      navigate("/");
       return;
     }
     fetchRooms();
@@ -50,6 +53,36 @@ export default function Home() {
     }
   }
 
+  async function handleAssociateRoom(e: React.FormEvent) {
+    e.preventDefault();
+
+    const roomId = Number(newRoomName.trim());
+    const userId = Number(user?.id);
+
+    if (!Number.isInteger(roomId) || roomId <= 0) {
+      setError("Informe um código de sala válido.");
+      return;
+    }
+
+    if (!Number.isInteger(userId) || userId <= 0) {
+      setError("Não foi possível identificar o usuário autenticado.");
+      return;
+    }
+
+    setCreating(true);
+    setError("");
+
+    try {
+      await associateRoom(roomId, userId);
+      setNewRoomName("");
+      await fetchRooms();
+    } catch {
+      setError("Failed to associate room.");
+    } finally {
+      setCreating(false);
+    }
+  }
+
   async function handleDeleteRoom(id: number) {
     try {
       await deleteRoom(id);
@@ -59,66 +92,93 @@ export default function Home() {
     }
   }
 
-  function handleLogout() {
-    sessionStorage.removeItem("token");
-    navigate("/login");
-  }
+   function handleLogout() {
+     if (typeof window !== 'undefined') {
+       sessionStorage.removeItem("token");
+     }
+     navigate("/");
+   }
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <header className="bg-white shadow px-6 py-4 flex items-center justify-between">
-        <h1 className="text-xl font-bold text-gray-800">TeachDoc</h1>
-        <Button type="button" variant="ghost" onClick={handleLogout}>
-          Logout
-        </Button>
-      </header>
-
-      <main className="max-w-3xl mx-auto py-10 px-4">
-        <h2 className="text-lg font-semibold text-gray-700 mb-4">My Rooms</h2>
-
-        <form onSubmit={handleCreateRoom} className="flex gap-2 mb-6">
-          <Input
-            type="text"
-            placeholder="New room name"
-            value={newRoomName}
-            onChange={(e) => setNewRoomName(e.target.value)}
-          />
-          <Button type="submit" disabled={creating}>
-            {creating ? "Creating..." : "Create"}
-          </Button>
-        </form>
-
-        {error && <p className="text-red-500 mb-4">{error}</p>}
-
-        {loading ? (
-          <p className="text-gray-500">Loading rooms...</p>
-        ) : rooms.length === 0 ? (
-          <p className="text-gray-400">No rooms yet. Create one above.</p>
-        ) : (
-          <ul className="space-y-3">
-            {rooms.map((room) => (
-              <li
-                key={room.id}
-                className="bg-white rounded shadow px-4 py-3 flex items-center justify-between"
-              >
-                <div>
-                  <p className="font-medium text-gray-800">{room.name}</p>
-                  <p className="text-sm text-gray-400">
-                    {new Date(room.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => handleDeleteRoom(room.id)}
-                >
-                  Delete
+      <AppHeader
+        userName={user?.name}
+        actionLabel="Logout"
+        onAction={handleLogout}
+      />
+            <main className="max-w-3xl mx-auto py-10 px-4">
+              <h2 className="text-lg font-semibold text-gray-700 mb-4">Minhas Salas</h2>
+              {
+              user?.role !== 'STUDENT' ?
+              <form onSubmit={handleCreateRoom} className="flex gap-2 mb-6">
+                <Input
+                    type="text"
+                    placeholder="New room name"
+                    value={newRoomName}
+                    onChange={(e) => setNewRoomName(e.target.value)}
+                />
+                <Button type="submit" disabled={creating}>
+                  {creating ? "Criando..." : "Criar"}
                 </Button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </main>
+              </form>
+              : <>
+                    <form onSubmit={handleAssociateRoom} className="flex gap-2 mb-6">
+                      <Input
+                          type="text"
+                          placeholder="Inserir código da sala"
+                          value={newRoomName}
+                          onChange={(e) => setNewRoomName(e.target.value)}
+                      />
+                      <Button type="submit" disabled={creating}>
+                        {creating ? "Entrando..." : "Entrar"}
+                      </Button>
+                    </form>
+              </>
+              }
+
+              {error && <p className="text-red-500 mb-4">{error}</p>}
+
+              {loading ? (
+                  <p className="text-gray-500">Loading rooms...</p>
+              ) : rooms.length === 0 ? (
+                  <p className="text-gray-400">Não foram encontradas salas</p>
+              ) : (
+                  <ul className="space-y-3">
+                    {rooms.map((room) => (
+                        <li
+                            key={room.id}
+                            className="bg-white rounded shadow px-4 py-3 flex items-center justify-between cursor-pointer transition hover:bg-gray-50"
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => navigate(`/rooms/${room.id}`)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                navigate(`/rooms/${room.id}`);
+                              }
+                            }}
+                        >
+                          <div>
+                            <p className="font-medium text-gray-800">{room.name}</p>
+                            <p className="text-sm text-gray-400">
+                              {new Date(room.createdAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <Button
+                              type="button"
+                              variant="secondary"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteRoom(room.id);
+                              }}
+                          >
+                            Delete
+                          </Button>
+                        </li>
+                    ))}
+                  </ul>
+              )}
+            </main>
     </div>
   );
 }
