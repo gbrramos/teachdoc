@@ -39,7 +39,6 @@ class ApiService {
       method,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
         ...this.getAuthHeader(),
         ...options.headers,
       },
